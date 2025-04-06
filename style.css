@@ -82,7 +82,6 @@ body, html { z-index: 2; color: #ffffff; font-family: 'poppins';}
 
 #filter {
     background-color: var(--base-gray);
-    display: none ;
 }
 
 /* resultados */
