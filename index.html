@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whisper</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.6.2/fuse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/levenshtein/1.0.5/levenshtein.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="particles-js"></div>
+    
+    <div id="home">
+        <header class="searchContainer">
+            <div class="homeButton">
+                <button id="homeButton" class="home-btn" onclick="goToHome()"></button>
+            </div>
+            <div class="searchInputContainer">
+                <input type="text" id="search" placeholder="Pesquisar">
+                
+            </div>
+            <div class="FilterDropDown">
+                <button id="FilterDropDown"></button>
+            </div>   
+        </header>
+    </div>
+
+    <!-- Campo para inserir nome do JSON -->
+    <div id="filter">
+        <div id="filter-config">
+            <label for="jsonName">Nome (opcional(não)):</label>
+            <input type="text" id="jsonName" placeholder="(opcional)">
+            <br>
+            <label for="urlInput">Adicionar link:</label>
+            <input type="text" id="urlInput" placeholder="felipe neto">
+            <button onclick="saveData()">Salvar Dados</button>
+        </div>
+        
+        <!-- Lista de URLs inseridas -->
+        <div class="url-list" id="urlList"></div>
+    </div>
+
+    
+
+    <div class="downloads-f">
+        <div id="downloads"></div>
+    </div>
+    
+    <div id="loading">Carregando...</div>
+
+    <div id="pagination" class="pagination">
+        <button id="prevPage" onclick="changePage(-1)">&laquo;</button>
+        <div id="pageNumbers"></div>
+        <button id="nextPage" onclick="changePage(1)">&raquo;</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
