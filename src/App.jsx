@@ -4,13 +4,25 @@ import { useState, useEffect } from "react";
 
 function App() {
   const [newUrl, setNewUrl] = useState("");
-  const [selectedUrls, setSelectedUrls] = useState([]);
   const [data, setData] = useState([]);
   const [search, setSearch] = useState("");
 
   const [urls, setUrls] = useState(() => {
-    const stored = localStorage.getItem("jsonURLs");
-    return stored ? JSON.parse(stored) : [];
+    try {
+      const stored = localStorage.getItem("jsonURLs");
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+  
+  const [selectedUrls, setSelectedUrls] = useState(() => {
+    const stored = localStorage.getItem("selectedURLs");
+    try {
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
   });
   
 
@@ -18,7 +30,8 @@ function App() {
 
   useEffect(() => {
     localStorage.setItem("jsonURLs", JSON.stringify(urls));
-  }, [urls]);
+    localStorage.setItem("selectedURLs", JSON.stringify(selectedUrls));
+  }, [urls, selectedUrls]);
 
   // Adicione este efeito
   useEffect(() => {
@@ -30,33 +43,30 @@ function App() {
   }, [selectedUrls]); // Executa sempre que selectedUrls mudar
 
   useEffect(() => {
-    const fetchData = async () => {
-      const allData = [];
-  
-      for (const url of urls) {
-        try {
-          const res = await fetch(url);
-          if (!res.ok) throw new Error(`Erro ao buscar ${url}: ${res.statusText}`);
-          const json = await res.json();
-  
-          const downloadsComFonte = json.downloads.map((item) => ({
-            ...item,
-            sourceName: json.name,
-          }));
-  
-          allData.push(...downloadsComFonte);
-        } catch (error) {
-          console.error(error);
-        }
+    const fetchSelectedData = async () => {
+      if (selectedUrls.length === 0) {
+        setData([]);
+        return;
       }
   
-      setData(allData);
+      const newData = [];
+      for (const url of selectedUrls) {
+        try {
+          const res = await fetch(url);
+          const json = await res.json();
+          newData.push(...json.downloads.map(item => ({
+            ...item,
+            sourceName: json.name
+          })));
+        } catch (err) {
+          console.error(`Erro ao carregar ${url}:`, err);
+        }
+      }
+      setData(newData);
     };
   
-    if (urls.length > 0) {
-      fetchData();
-    }
-  }, [urls]);
+    fetchSelectedData();
+  }, [selectedUrls]); // Executa SOMENTE quando selectedUrls muda
   
 
   // Adicionar novo link
@@ -64,7 +74,7 @@ function App() {
     if (!newUrl.trim()) return;
     if (!urls.includes(newUrl)) {
       setUrls([...urls, newUrl]);
-      setSelectedUrls([...selectedUrls, newUrl]); // Auto-seleciona a nova URL
+      setSelectedUrls([...selectedUrls, newUrl]); // Auto-seleciona nova URL
     }
     setNewUrl("");
   };
@@ -72,11 +82,12 @@ function App() {
 
   // Marcar/desmarcar checkboxes
   const toggleUrl = (url) => {
-    const newSelection = selectedUrls.includes(url)
-    ? selectedUrls.filter((u) => u !== url)
-    : [...selectedUrls, url];
-  
-  setSelectedUrls(newSelection);
+    setSelectedUrls(prev => {
+      const newSelection = prev.includes(url)
+        ? prev.filter(u => u !== url)
+        : [...prev, url];
+      return newSelection;
+    });
   };
 
 
@@ -107,8 +118,8 @@ function App() {
 
   // Remover link
   const handleRemoveUrl = (urlToRemove) => {
-    setUrls(urls.filter((url) => url !== urlToRemove));
-    setSelectedUrls(selectedUrls.filter((url) => url !== urlToRemove));
+    setUrls(prev => prev.filter(url => url !== urlToRemove));
+    setSelectedUrls(prev => prev.filter(url => url !== urlToRemove));
   };
 
   const filteredData = data.filter((item) =>
