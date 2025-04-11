@@ -1,4 +1,16 @@
 
 @import "tailwindcss";
 
+html {
+    scroll-behavior: smooth;
+}
+
+p {
+    cursor: default;
+}
+
+button {
+    cursor: pointer;
+}
+
 
