@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whisper</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-100">
+    <header class="bg-white shadow-md fixed w-full top-0 z-10">
+        <div class="container mx-auto px-4 py-3 flex items-center gap-4">
+            <h1 class="text-2xl font-bold text-indigo-600">WHISPER</h1>
+            
+            <div class="flex-1 relative">
+                <input type="search" id="searchInput" 
+                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    placeholder="Search games...">
+            </div>
+            
+            <button id="settingsBtn" class="p-2 hover:bg-gray-100 rounded-lg">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+
+        <div id="settingsPanel" class="hidden container mx-auto px-4 py-4 border-t">
+            <div class="max-w-xl">
+                <div class="flex gap-2 mb-4">
+                    <input type="url" id="sourceInput" 
+                        class="flex-1 px-3 py-2 border rounded"
+                        placeholder="Add JSON source URL">
+                    <button id="addSourceBtn" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+                        Add
+                    </button>
+                </div>
+
+                <div class="mb-4">
+                    <div class="flex gap-2 mb-2">
+                        <button id="selectAll" class="px-3 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300">
+                            Select All
+                        </button>
+                        <button id="deselectAll" class="px-3 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300">
+                            Deselect All
+                        </button>
+                        <button id="applySources" class="px-3 py-1 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700">
+                            Apply
+                        </button>
+                    </div>
+                    
+                    <ul id="sourcesList" class="space-y-2">
+                        <!-- Sources will be loaded here -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <main class="container mx-auto px-4 pt-24 pb-8">
+        <div id="results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Results will be loaded here -->
+        </div>
+
+        <div id="pagination" class="mt-4 flex justify-center gap-2 hidden">
+            <!-- Pagination buttons -->
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
