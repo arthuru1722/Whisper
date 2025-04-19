@@ -1,30 +1,89 @@
-/* Custom styles */
 .truncate {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.source-item {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.source-item:hover {
+    background-color: #f3f4f6;
+}
+
+.settings-icon {
+    transition: transform 0.3s ease;
+}
+
+.settings-icon.active {
+    transform: rotate(90deg);
+}
+
+.settings-icon span {
+    transition: all 0.3s ease;
+}
+
+.settings-icon.active span:first-child {
+    transform: translateY(5px) rotate(45deg);
+}
+
+.settings-icon.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.settings-icon.active span:last-child {
+    transform: translateY(-5px) rotate(-45deg);
+    width: 24px;
+}   
+
+/* Adicione estes estilos para os selects */
+select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    
+    background-position: right 0.5rem center;
+    background-size: 1em;
+    vertical-align: middle;
+    padding-right: 2.5rem;
+}
+
+select:hover {
+    border-color: #818cf8;
 }
 
 .tooltip {
     position: relative;
-}
-
-.tooltip:hover::after {
+    display: inline-block;
+    cursor: pointer;
+  }
+  
+  .tooltip::after {
     content: attr(data-tooltip);
+    visibility: hidden;
+    min-width: 120px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px;
     position: absolute;
-    bottom: 100%;
+    z-index: 1;
+    bottom: 125%; /* Ajuste se necessário */
     left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0,0,0,0.8);
-    color: white;
-    padding: 4px 8px;
-    border-radius: 4px;
-    white-space: nowrap;
-    font-size: 12px;
-}
-
-#pagination span {
-    display: inline-flex;
-    align-items: center;
-    height: 100%;
-}
+    margin-left: -60px;
+    
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 99;
+  }
+  
+  .tooltip:hover::after {
+    visibility: visible;
+    opacity: 1;
+  }
+  

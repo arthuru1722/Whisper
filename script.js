@@ -3,6 +3,43 @@ let currentPage = 1;
 let allResults = [];
 let searchTerm = '';
 
+let sortBy = 'name'; // 'name', 'source', 'date'
+let sortOrder = 'asc'; // 'asc' or 'desc'
+
+function sortResults(results) {
+    return results.sort((a, b) => {
+        let valueA, valueB;
+        
+        switch(sortBy) {
+            case 'date':
+                valueA = new Date(a.uploadDate);
+                valueB = new Date(b.uploadDate);
+                break;
+            case 'source':
+                valueA = a.name.toLowerCase();
+                valueB = b.name.toLowerCase();
+                break;
+            default: // name
+                valueA = a.title.toLowerCase();
+                valueB = b.title.toLowerCase();
+        }
+
+        return sortOrder === 'asc' 
+            ? valueA > valueB ? 1 : -1
+            : valueA < valueB ? 1 : -1;
+    });
+}
+
+document.getElementById('sortBySelect').addEventListener('change', () => {
+    sortBy = document.getElementById('sortBySelect').value;
+    filterResults();
+});
+
+document.getElementById('orderSelect').addEventListener('change', () => {
+    sortOrder = document.getElementById('orderSelect').value;
+    filterResults();
+});
+
 // Source management
 function loadSources() {
     return JSON.parse(localStorage.getItem(STATE_KEY) || '[]');
@@ -17,12 +54,12 @@ function renderSources() {
     const sources = loadSources();
     
     list.innerHTML = sources.map((source, index) => `
-        <li class="flex items-center gap-2 p-2 bg-white rounded border hover:bg-gray-50 cursor-pointer" 
+        <li class="flex items-center gap-2 p-2 bg-gray-700 rounded border border-gray-600 hover:bg-gray-600 cursor-pointer transition-colors" 
             onclick="toggleSource(${index})">
             <input type="checkbox" ${source.enabled ? 'checked' : ''} 
-                   class="pointer-events-none">
-            <span class="flex-1 text-sm truncate">${source.url}</span>
-            <button onclick="removeSource(${index})" class="text-red-500 hover:text-red-700">
+                   class="pointer-events-none accent-indigo-500">
+            <span class="flex-1 text-sm truncate text-gray-300">${source.url}</span>
+            <button onclick="removeSource(${index})" class="text-red-400 hover:text-red-300">
                 ✕
             </button>
         </li>
@@ -70,6 +107,10 @@ async function search() {
 }
 
 function filterResults() {
+    if (!searchTerm.trim()) {
+        showResults([]); // Forçar array vazio
+        return;
+    }
     const normalizedSearch = searchTerm.toLowerCase()
         .replace(/[^a-z0-9]/g, '')
         .replace(/iv/g, '4')
@@ -90,36 +131,46 @@ function filterResults() {
         return title.includes(normalizedSearch);
     });
 
-    showResults(filtered);
+    const sorted = sortResults(filtered);
+    showResults(sorted);
 }
 
 function showResults(results) {
+    const paginationDiv = document.getElementById('pagination');
+
+    // Esconder resultados e paginação se não houver dados
+    if (!results.length) {
+        resultsDiv.innerHTML = '';
+        paginationDiv.classList.add('hidden');
+        return;
+    }
     const start = (currentPage - 1) * 9;
     const paginated = results.slice(start, start + 9);
     
     const resultsDiv = document.getElementById('results');
     resultsDiv.innerHTML = paginated.map(item => `
-        <div class="bg-white rounded-lg shadow-md p-4">
-            <div class="space-y-2">
-                <h3 class="text-sm font-semibold tooltip" data-tooltip="${item.title}">
+        <div class="bg-gray-800 rounded-lg shadow-lg p-4 h-100 hover:bg-gray-750 transition-colors">
+            <div class="space-y-2 flex flex-col justify-between h-full">
+                <h3 class="text-sm font-semibold text-white tooltip" data-tooltip="${item.title}">
                     ${item.title.slice(0, 100)}${item.title.length > 100 ? '...' : ''}
                 </h3>
-                <p class="text-xs text-gray-500">${item.name}</p>
-                <div class="text-xs space-y-1">
+                <p class="text-xs text-gray-400">${item.name}</p>
+                <div class="text-xs space-y-1 text-gray-300">
                     <div>Size: ${item.fileSize}</div>
                     <div>Uploaded: ${new Date(item.uploadDate).toLocaleDateString()}</div>
                 </div>
                 <div class="flex gap-2 mt-2">
                     <button onclick="window.open('${item.uris[0]}')" 
-                        class="flex-1 px-2 py-1 text-xs bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200">
+                        class="flex-1 px-2 py-1 text-xs bg-indigo-800 text-indigo-100 rounded hover:bg-indigo-700">
                         Open
                     </button>
                     <button onclick="navigator.clipboard.writeText('${item.uris[0]}')" 
-                        class="px-2 py-1 text-xs bg-gray-100 rounded hover:bg-gray-200">
+                        class="px-2 py-1 text-xs bg-gray-700 text-gray-300 rounded hover:bg-gray-600">
                         Copy
                     </button>
-                    <button onclick="openWebtor('${item.uris[0]}')" 
-                        class="px-2 py-1 text-xs bg-gray-100 rounded hover:bg-gray-200">
+                    <button onclick="openWebtor('${item.uris[0]}')"  
+                        data-tooltip="Pode não funcionar"
+                        class="tooltip px-2 py-1 text-xs bg-gray-700 text-gray-300 rounded hover:bg-gray-600">
                         Webtor
                     </button>
                 </div>
@@ -132,7 +183,7 @@ function showResults(results) {
 
 function openWebtor(magnet) {
     const hash = magnet.match(/btih:([^&]+)/i)[1];
-    window.open(`https://webtor.io/${hash.toUpperCase()}`);
+    window.open(`https://webtor.io/${hash.toLCase()}`);
 }
 
 // Pagination
@@ -164,52 +215,63 @@ function renderPagination(total) {
         }
     }
 
-    // Previous Button
+    // Botão Anterior
     html += `
         <button onclick="setPage(${currentPage - 1})" 
             ${currentPage === 1 ? 'disabled' : ''}
-            class="p-2 rounded bg-gray-200 hover:bg-gray-300 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}">
+            class="p-2 rounded bg-gray-700 hover:bg-gray-600 text-gray-300 ${
+                currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}">
             &lt;
         </button>`;
 
-    // First Page
+    // Primeira Página
     if (startPage > 1) {
         html += `
             <button onclick="setPage(1)" 
-                class="w-8 h-8 rounded ${1 === currentPage ? 'bg-indigo-600 text-white' : 'bg-gray-200'}">
+                class="w-8 h-8 rounded ${
+                    1 === currentPage 
+                    ? 'bg-indigo-500 text-white' 
+                    : 'bg-gray-700 hover:bg-gray-600 text-gray-300'}">
                 1
             </button>`;
         if (startPage > 2) {
-            html += `<span class="px-2">...</span>`;
+            html += `<span class="px-2 text-gray-400">...</span>`;
         }
     }
 
-    // Page Numbers
+    // Números das Páginas
     for (let i = startPage; i <= endPage; i++) {
         html += `
             <button onclick="setPage(${i})" 
-                class="w-8 h-8 rounded ${i === currentPage ? 'bg-indigo-600 text-white' : 'bg-gray-200'}">
+                class="w-8 h-8 rounded ${
+                    i === currentPage 
+                    ? 'bg-indigo-500 text-white' 
+                    : 'bg-gray-700 hover:bg-gray-600 text-gray-300'}">
                 ${i}
             </button>`;
     }
 
-    // Last Page
+    // Última Página
     if (endPage < pages) {
         if (endPage < pages - 1) {
-            html += `<span class="px-2">...</span>`;
+            html += `<span class="px-2 text-gray-400">...</span>`;
         }
         html += `
             <button onclick="setPage(${pages})" 
-                class="w-8 h-8 rounded ${pages === currentPage ? 'bg-indigo-600 text-white' : 'bg-gray-200'}">
+                class="w-8 h-8 rounded ${
+                    pages === currentPage 
+                    ? 'bg-indigo-500 text-white' 
+                    : 'bg-gray-700 hover:bg-gray-600 text-gray-300'}">
                 ${pages}
             </button>`;
     }
 
-    // Next Button
+    // Botão Próximo
     html += `
         <button onclick="setPage(${currentPage + 1})" 
             ${currentPage === pages ? 'disabled' : ''}
-            class="p-2 rounded bg-gray-200 hover:bg-gray-300 ${currentPage === pages ? 'opacity-50 cursor-not-allowed' : ''}">
+            class="p-2 rounded bg-gray-700 hover:bg-gray-600 text-gray-300 ${
+                currentPage === pages ? 'opacity-50 cursor-not-allowed' : ''}">
             &gt;
         </button>`;
 
@@ -268,6 +330,11 @@ searchInput.addEventListener('input', debounce(e => {
     filterResults();
 }, 300));
 
+document.addEventListener('DOMContentLoaded', () => {
+    renderSources();
+    // Remover a chamada search() inicial
+});
+
 // Initial load
-renderSources();
+
 search();
